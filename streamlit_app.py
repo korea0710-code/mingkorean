@@ -16,7 +16,42 @@ SYSTEM_PROMPT = (
 
 
 def get_api_key() -> str:
-    return st.secrets.get("OPENAI_API_KEY", "")
+    # 1) Streamlit secrets
+    try:
+        key = st.secrets.get("OPENAI_API_KEY")
+        if key:
+            return key
+    except Exception:
+        pass
+
+    # 2) Environment variable
+    import os
+
+    key = os.environ.get("OPENAI_API_KEY")
+    if key:
+        return key
+
+    # 3) Fallback: parse .streamlit/secrets.toml directly (best-effort, avoid printing key)
+    try:
+        secrets_path = os.path.join(os.getcwd(), ".streamlit", "secrets.toml")
+        if os.path.exists(secrets_path):
+            with open(secrets_path, "r", encoding="utf-8") as f:
+                for line in f:
+                    if "OPENAI_API_KEY" in line:
+                        # naive parsing: remove key, equals and quotes
+                        parts = line.split("=", 1)
+                        if len(parts) == 2:
+                            v = parts[1].strip()
+                            if v.startswith('"') and v.endswith('"'):
+                                v = v[1:-1]
+                            elif v.startswith("'") and v.endswith("'"):
+                                v = v[1:-1]
+                            if v:
+                                return v
+    except Exception:
+        pass
+
+    return ""
 
 
 def init_session():
