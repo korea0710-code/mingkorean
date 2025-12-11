@@ -180,7 +180,6 @@ def main():
 
     if reset:
         st.session_state.messages = [st.session_state.messages[0]]
-        st.experimental_rerun()
 
     if send and user_text:
         append_user_message(user_text)
@@ -191,7 +190,6 @@ def main():
                 st.error(f"OpenAI 요청 중 오류가 발생했어: {e}")
                 reply = "미안해, 지금은 답을 못하겠어. 잠시 후 다시 시도해줘."
         append_assistant_message(reply)
-        st.experimental_rerun()
 
 
 if __name__ == "__main__":
